@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <!-- boxicons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <title>Program Absensi</title>
+
+    <style>
+        .container-fluid {
+            background-color: orange;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .sidebar, .content {
+            height: 96vh;
+            overflow: hidden;
+        }
+        .container-fluid ul {
+            list-style: none;
+        }
+        .sidebar ul li {
+            padding: 1px 10px;
+            transition: .5s;
+        }
+        .sidebar ul li:hover {
+            background-color: blue;
+            cursor: pointer;
+            padding: 1px 10px;
+            border-radius: 10px;
+        }
+        .content i {
+            cursor: pointer;
+        }
+        .content{
+            position: relative;
+        }
+        .content .row .profil {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            bottom: 10px;
+        }
+        .content .row .table-record .table-absen-masuk,
+        .content .row .table-record .table-absen-pulang {
+            height: 30vh;
+            overflow-x: scroll;
+        }
+        #absensi {
+            display: none;
+        }
+        #login-system {
+            margin-top: 100px;
+        }
+        #login-system .register-link {
+            cursor: pointer;
+        }
+        #login-system .register-link:hover {
+            text-decoration: underline;
+        }
+
+        #register-system {
+            margin-top: 100px;
+            display: none;
+        }
+        #register-system i {
+            cursor: pointer;
+        }
+    </style>
+  </head>
+  <body>
+    
+    <div id="app" class="container-fluid py-3 px-5">
+        <div class="row" id="login-system">
+            <div class="col-md-4 bg-primary mx-auto shadow rounded py-3">
+                <form @submit.prevent="submitFormLogin">
+                    <h3 class="text-center border-bottom border-dark pb-3 mb-3 text-light fw-bold">Login System</h3>
+                    <div class="mb-3">
+                      <label for="username" class="form-label">Username</label>
+                      <input v-model="login.username" type="text" class="form-control" id="username">
+                    </div>
+                    <div class="mb-3">
+                      <label for="password" class="form-label">Password</label>
+                      <input v-model="login.password" type="password" class="form-control" id="password">
+                    </div>
+                    <button type="submit" class="btn btn-secondary form-control mt-2">Submit</button>
+                    <p class="text-light mt-3 register-link" @click="registerLink">Belum punya akun?</p>
+                </form>
+            </div>
+        </div>
+
+        <div class="row" id="register-system">
+            <div class="col-md-4 bg-primary mx-auto shadow rounded py-3">
+                <form @submit.prevent="submitFormRegister">
+                    <i class='bx bx-arrow-back fs-1 float-start fw-bold' @click="back"></i>
+                    <h3 class="text-center border-bottom border-dark pb-3 mb-3 text-light fw-bold">Register System</h3>
+                    <div class="mb-3">
+                      <label for="fullname" class="form-label">Nama Lengkap</label>
+                      <input v-model="form.fullname" type="text" class="form-control" id="fullname">
+                    </div>
+                    <div class="mb-3">
+                      <label for="notelp" class="form-label">no. telp</label>
+                      <input v-model="form.notelp" type="number" class="form-control" id="notelp">
+                    </div>
+                    <div class="mb-3">
+                      <label for="username" class="form-label">Username</label>
+                      <input v-model="form.username" type="text" class="form-control" id="username">
+                    </div>
+                    <div class="mb-3">
+                      <label for="password" class="form-label">Password</label>
+                      <input v-model="form.password" type="password" class="form-control" id="password">
+                    </div>
+                    <button type="submit" class="btn btn-secondary form-control mt-2">Submit</button>
+                </form>
+            </div>
+        </div>
+
+
+        <div id="absensi">
+            <div class="row">
+                <section class="sidebar col-md-2 bg-dark text-light">
+                    <h3 class="border-bottom border-light text-center mb-5 mt-3 pb-2">Navigasi</h3>
+                    <ul class="fw-bold">
+                        <li class="my-4"> <i class='bx bx-time me-4'></i> absensi</li>
+                        <li class="my-4"> <i class='bx bxs-report me-4' style='color:#ffffff' ></i> laporan</li>
+                        <li class="my-4"> <i class='bx bx-cog me-4' style='color:#ffffff' ></i> setting</li>
+                    </ul>
+                </section>
+                <section class="content col-md-10 bg-light text-dark py-3 px-3">
+                    <div class="row">
+                        <div class="col-md-11 header d-flex justify-content-between">
+                            <h3>Halaman Absensi</h3>
+                        </div>
+                    </div>
+                    <div class="row mt-5">
+                        <div class="col-md-4 mt-5 ms-3">
+                            <div class="time">
+                                <h1>{{ times }}</h1>
+                                <p>{{ date }}</p>
+                            </div>
+                            <div class="btn-absen d-flex align-items-center gap-3 mt-3">
+                                <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                      Absen Masuk
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                      <li><a class="dropdown-item" @click="getAbsenMasuk">Absen Masuk</a></li>
+                                      <li><a class="dropdown-item" href="#">Absen Pulang</a></li>
+                                    </ul>
+                                  </div>
+                                  <div class="dropdown">
+                                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                                      Absen Tidak Masuk
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                      <li><a class="dropdown-item" @click="() => getAbsenTidakMasuk('sakit')">Ijin Sakit</a></li>
+                                      <li><a class="dropdown-item" @click="() => getAbsenTidakMasuk('cuti')">Ijin Cuti</a></li>
+                                    </ul>
+                                  </div>
+                            </div>
+                           
+                        </div>
+                        <div class="table-record col-md-6 px-3">
+                            <div class="table-absen-masuk">
+                                <h3 class="text-center fw-lighhter text-uppercase border-bottom mb-3 pb-2 text-primary">Absen Masuk</h3>
+                                <table class="table table-striped">
+                                    <thead class="text-center">
+                                        <tr>
+                                            <th>No</th>
+                                            <th>tanggal</th>
+                                            <th>waktu</th>
+                                            <th>Absen</th>
+                                            <th>Ket.</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-center">
+                                        <tr v-for="aMasuk in absenMasuk" :key="aMasuk.id">
+                                            <td>{{ aMasuk.id + 1 }}</td>
+                                            <td>{{ aMasuk.tgl }}</td>
+                                            <td>{{ aMasuk.waktu }}</td>
+                                            <td>{{ aMasuk.absen }}</td>
+                                            <td>{{ aMasuk.ket }}</td>
+                                            <td class="text-danger">{{ aMasuk.status }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="table-absen-pulang mt-5">
+                                <h3 class="text-center fw-lighhter text-uppercase border-bottom mb-3 pb-2 text-danger">Absen Pulang</h3>
+                                <table class="table table-striped">
+                                    <thead class="text-center">
+                                        <tr>
+                                            <th>No</th>
+                                            <th>tanggal</th>
+                                            <th>waktu</th>
+                                            <th>Absen</th>
+                                            <th>Ket.</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-center">
+                                        <tr v-for="aMasuk in absenMasuk" :key="aMasuk.id">
+                                            <td>{{ aMasuk.id }}</td>
+                                            <td>{{ aMasuk.tgl }}</td>
+                                            <td>{{ aMasuk.waktu }}</td>
+                                            <td>{{ aMasuk.absen }}</td>
+                                            <td>{{ aMasuk.ket }}</td>
+                                            <td class="text-danger">{{ aMasuk.status }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-1 profil text-center bg-secondary text-light d-flex flex-column align-items-center justify-content-between py-3 px-2 rounded shadow overflow-hidden">
+                            <div class="top text-center">
+                                <i class='bx bxs-user-circle fs-1'></i>
+                                <p>{{ login.username }}</p>
+                            </div>
+                            <div class="bottom">
+                                <i @click="logout" class='bx bx-log-out fs-1'></i>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+    <!-- cdn vue js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- my script js -->
+    <script src="script.js"></script>
+
+  </body>
+</html>
